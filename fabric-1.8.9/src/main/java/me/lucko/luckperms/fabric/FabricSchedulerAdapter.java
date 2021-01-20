@@ -33,7 +33,7 @@ public class FabricSchedulerAdapter extends AbstractJavaScheduler {
     private final Executor sync;
 
     public FabricSchedulerAdapter(LPFabricBootstrap bootstrap) {
-        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")).submitAndJoin(r);
+        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready"));
     }
 
     @Override

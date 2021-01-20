@@ -31,10 +31,9 @@ import me.lucko.luckperms.common.query.QueryOptionsImpl;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.model.MixinUser;
 
+import net.fabricmc.fabric.api.command.v1.ServerCommandSource;
 import net.fabricmc.fabric.api.util.TriState;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -53,9 +52,9 @@ public class PermissionCheckListener {
         PermissionCheckEvent.EVENT.register(this::onPermissionCheck);
     }
 
-    private @NonNull TriState onPermissionCheck(CommandSource source, String permission) {
+    private @NonNull TriState onPermissionCheck(ServerCommandSource source, String permission) {
         if (source instanceof ServerCommandSource) {
-            Entity entity = ((ServerCommandSource) source).getEntity();
+            Entity entity = source.getEntity();
             if (entity instanceof ServerPlayerEntity) {
                 return onPlayerPermissionCheck((ServerPlayerEntity) entity, permission);
             }
@@ -76,9 +75,9 @@ public class PermissionCheckListener {
         }
     }
 
-    private TriState onOtherPermissionCheck(CommandSource source, String permission) {
-        if (source instanceof ServerCommandSource) {
-            String name = ((ServerCommandSource) source).getName();
+    private TriState onOtherPermissionCheck(ServerCommandSource source, String permission) {
+        if (source != null) {
+            String name = source.getSource().getName().getString();
             this.plugin.getVerboseHandler().offerPermissionCheckEvent(me.lucko.luckperms.common.verbose.event.PermissionCheckEvent.Origin.PLATFORM_PERMISSION_CHECK, name, QueryOptionsImpl.DEFAULT_CONTEXTUAL, permission, TristateResult.UNDEFINED);
             this.plugin.getPermissionRegistry().offer(permission);
         }

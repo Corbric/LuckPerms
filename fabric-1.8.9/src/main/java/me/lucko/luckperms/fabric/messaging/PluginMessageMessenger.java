@@ -30,13 +30,13 @@ import com.google.common.collect.Iterables;
 import me.lucko.luckperms.common.plugin.scheduler.SchedulerTask;
 import me.lucko.luckperms.fabric.LPFabricPlugin;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+//import net.fabricmc.fabric.api.networking.v1.PacketSender;
+//import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.luckperms.api.messenger.IncomingMessageConsumer;
 import net.luckperms.api.messenger.Messenger;
 import net.luckperms.api.messenger.message.OutgoingMessage;
-import net.minecraft.network.PacketByteBuf;
+//import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -48,7 +48,7 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.PlayChannelHandler {
+public class PluginMessageMessenger implements Messenger {//, ServerPlayNetworking.PlayChannelHandler {
     private static final Identifier CHANNEL = new Identifier("luckperms", "update");
 
     private final LPFabricPlugin plugin;
@@ -60,12 +60,12 @@ public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.P
     }
 
     public void init() {
-        ServerPlayNetworking.registerGlobalReceiver(CHANNEL, this);
+//        ServerPlayNetworking.registerGlobalReceiver(CHANNEL, this);
     }
 
     @Override
     public void close() {
-        ServerPlayNetworking.unregisterGlobalReceiver(CHANNEL);
+//        ServerPlayNetworking.unregisterGlobalReceiver(CHANNEL);
     }
 
     @Override
@@ -77,15 +77,15 @@ public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.P
                 return;
             }
 
-            Collection<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
+            Collection<ServerPlayerEntity> players = server.getPlayerManager().getPlayers();
             ServerPlayerEntity p = Iterables.getFirst(players, null);
             if (p == null) {
                 return;
             }
 
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeString(outgoingMessage.asEncodedString());
-            ServerPlayNetworking.send(p, CHANNEL, buf);
+//            PacketByteBuf buf = PacketByteBufs.create();
+//            buf.writeString(outgoingMessage.asEncodedString());
+//            ServerPlayNetworking.send(p, CHANNEL, buf);
 
             SchedulerTask t = taskRef.getAndSet(null);
             if (t != null) {
@@ -95,9 +95,9 @@ public class PluginMessageMessenger implements Messenger, ServerPlayNetworking.P
         taskRef.set(task);
     }
 
-    @Override
-    public void receive(MinecraftServer server, ServerPlayerEntity entity, ServerPlayNetworkHandler netHandler, PacketByteBuf buf, PacketSender packetSender) {
-        String msg = buf.readString();
-        this.consumer.consumeIncomingMessageAsString(msg);
-    }
+//    @Override
+//    public void receive(MinecraftServer server, ServerPlayerEntity entity, ServerPlayNetworkHandler netHandler, PacketByteBuf buf, PacketSender packetSender) {
+//        String msg = buf.readString();
+//        this.consumer.consumeIncomingMessageAsString(msg);
+//    }
 }

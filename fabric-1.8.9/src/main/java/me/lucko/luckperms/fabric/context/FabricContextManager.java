@@ -71,9 +71,6 @@ public class FabricContextManager extends ContextManager<ServerPlayerEntity, Ser
     @Override
     public QueryOptions formQueryOptions(ServerPlayerEntity subject, ImmutableContextSet contextSet) {
         QueryOptions.Builder queryOptions = this.plugin.getConfiguration().get(ConfigKeys.GLOBAL_QUERY_OPTIONS).toBuilder();
-        if (subject.getServer().isHost(subject.getGameProfile())) {
-            queryOptions.option(INTEGRATED_SERVER_OWNER, true);
-        }
 
         return queryOptions.context(contextSet).build();
     }

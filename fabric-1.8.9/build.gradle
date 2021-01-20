@@ -2,19 +2,20 @@ import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.1'
-    id 'fabric-loom' version '0.5-SNAPSHOT'
+    id 'fabric-loom' version '0.6-SNAPSHOT'
 }
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
     maven { url = 'https://dl.bintray.com/legacy-fabric/Legacy-Fabric-Maven' }
+    maven { url 'https://jitpack.io' }
     mavenLocal()
 }
 
 def minecraftVersion = '1.8.9'
 def yarnBuild = "1.8.9+build.202011050955"
 def loaderVersion = '0.9.3+build.202009100647'
-def fabricApiVersion = '0.10.0'
+def fabricApiVersion = ' por'
 
 minecraft {
     intermediaryUrl = {
@@ -32,7 +33,7 @@ dependencies {
     }
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
 
-    include(modImplementation('me.lucko:fabric-permissions-api:0.1-SNAPSHOT'))
+    modImplementation 'com.github.Corbric:fabric-permissions-api:9ca0cc8c43'
 
     compile project(':common')
 }

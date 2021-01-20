@@ -248,7 +248,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     public Collection<String> getPlayerList() {
         return getServer().map(MinecraftServer::getPlayerManager)
                 .map(server -> {
-                    List<ServerPlayerEntity> players = server.getPlayerList();
+                    List<ServerPlayerEntity> players = server.getPlayers();
                     List<String> list = new ArrayList<>(players.size());
                     for (ServerPlayerEntity player : players) {
                         list.add(player.getGameProfile().getName());
@@ -262,7 +262,7 @@ public final class LPFabricBootstrap implements LuckPermsBootstrap, DedicatedSer
     public Collection<UUID> getOnlinePlayers() {
         return getServer().map(MinecraftServer::getPlayerManager)
                 .map(server -> {
-                    List<ServerPlayerEntity> players = server.getPlayerList();
+                    List<ServerPlayerEntity> players = server.getPlayers();
                     List<UUID> list = new ArrayList<>(players.size());
                     for (ServerPlayerEntity player : players) {
                         list.add(player.getGameProfile().getId());

@@ -30,12 +30,13 @@ import me.lucko.luckperms.common.locale.TranslationManager;
 import me.lucko.luckperms.common.sender.Sender;
 import me.lucko.luckperms.common.sender.SenderFactory;
 import me.lucko.luckperms.fabric.model.MixinUser;
-
+import net.fabricmc.fabric.api.command.v1.ServerCommandSource;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.luckperms.api.util.Tristate;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
 import java.util.Locale;
@@ -64,7 +65,7 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected String getName(ServerCommandSource commandSource) {
-        String name = commandSource.getName();
+        String name = commandSource.getSource().getName().getString();
         if (commandSource.getEntity() != null && name.equals("Server")) {
             return Sender.CONSOLE_NAME;
         }
@@ -77,7 +78,7 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
         if (sender.getEntity() instanceof ServerPlayerEntity) {
             locale = ((MixinUser) sender.getEntity()).getCachedLocale();
         }
-        sender.sendFeedback(toNativeText(TranslationManager.render(message, locale)), false);
+        sender.sendFeedback(toNativeText(TranslationManager.render(message, locale)));
     }
 
     @Override
@@ -101,10 +102,12 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     @Override
     protected void performCommand(ServerCommandSource sender, String command) {
-        sender.getMinecraftServer().getCommandManager().execute(sender, command);
+        sender.getWorld().getServer().getCommandManager().execute(sender.getSource(), command);
     }
 
     public static Text toNativeText(Component component) {
-        return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(component));
+        //TODO:
+        return new LiteralText("You need to fix FabricSenderFactory#toNativeText");
+//        return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(component));
     }
 }

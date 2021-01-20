@@ -41,15 +41,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.GameMode;
 
+import net.minecraft.world.level.LevelInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEntity> {
-    private static final EnumNamer<GameMode> GAMEMODE_NAMER = new EnumNamer<>(
-            GameMode.class,
+    private static final EnumNamer<LevelInfo.GameMode> GAMEMODE_NAMER = new EnumNamer<>(
+            LevelInfo.GameMode.class,
             EnumNamer.LOWER_CASE_NAME
     );
 
@@ -65,21 +66,21 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
 
     @Override
     public void calculate(@NonNull ServerPlayerEntity target, @NonNull ContextConsumer consumer) {
-        GameMode mode = target.interactionManager.getGameMode();
-        if (mode != null && mode != GameMode.NOT_SET) {
+        LevelInfo.GameMode mode = target.interactionManager.getGameMode();
+        if (mode != null && mode != LevelInfo.GameMode.NOT_SET) {
             consumer.accept(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
         }
 
         // TODO: figure out dimension type context too
         ServerWorld world = target.getServerWorld();
-        this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(getContextKey(world.getRegistryKey().getValue()), consumer);
+        this.plugin.getConfiguration().get(ConfigKeys.WORLD_REWRITES).rewriteAndSubmit(world.getLevelProperties().getLevelName(), consumer);
     }
 
     @Override
     public ContextSet estimatePotentialContexts() {
         ImmutableContextSet.Builder builder = new ImmutableContextSetImpl.BuilderImpl();
 
-        for (GameMode mode : GameMode.values()) {
+        for (LevelInfo.GameMode mode : LevelInfo.GameMode.values()) {
             builder.add(DefaultContextKeys.GAMEMODE_KEY, GAMEMODE_NAMER.name(mode));
         }
 
@@ -87,9 +88,9 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
 
         Optional<MinecraftServer> server = this.plugin.getBootstrap().getServer();
         if (server.isPresent()) {
-            Iterable<ServerWorld> worlds = server.get().getWorlds();
+            Iterable<ServerWorld> worlds = Arrays.asList(server.get().worlds);
             for (ServerWorld world : worlds) {
-                String worldName = getContextKey(world.getRegistryKey().getValue());
+                String worldName = getContextKey(new Identifier(world.getLevelProperties().getLevelName()));
                 if (Context.isValidValue(worldName)) {
                     builder.add(DefaultContextKeys.WORLD_KEY, worldName);
                 }

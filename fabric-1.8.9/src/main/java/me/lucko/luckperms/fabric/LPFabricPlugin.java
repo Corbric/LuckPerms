@@ -47,7 +47,7 @@ import me.lucko.luckperms.fabric.context.FabricPlayerCalculator;
 import me.lucko.luckperms.fabric.listeners.FabricConnectionListener;
 import me.lucko.luckperms.fabric.listeners.PermissionCheckListener;
 import me.lucko.luckperms.fabric.messaging.FabricMessagingFactory;
-
+import net.fabricmc.fabric.api.command.v1.ServerCommandSource;
 import net.fabricmc.loader.api.ModContainer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
@@ -230,14 +230,14 @@ public class LPFabricPlugin extends AbstractLuckPermsPlugin {
     public Stream<Sender> getOnlineSenders() {
         return Stream.concat(
                 Stream.of(getConsoleSender()),
-                this.bootstrap.getServer().map(MinecraftServer::getPlayerManager).map(s -> s.getPlayerList().stream().map(p -> this.senderFactory.wrap(p.getCommandSource()))).orElseGet(Stream::empty)
+                this.bootstrap.getServer().map(MinecraftServer::getPlayerManager).map(s -> s.getPlayers().stream().map(p -> this.senderFactory.wrap(ServerCommandSource.from(p)))).orElseGet(Stream::empty)
         );
     }
 
     @Override
     public Sender getConsoleSender() {
         return this.bootstrap.getServer()
-                .map(s -> this.senderFactory.wrap(s.getCommandSource()))
+                .map(s -> this.senderFactory.wrap(ServerCommandSource.from(s)))
                 .orElseGet(() -> new DummySender(this, Sender.CONSOLE_UUID, Sender.CONSOLE_NAME) {
                     @Override
                     public void sendMessage(Component message) {

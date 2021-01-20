@@ -37,15 +37,15 @@ import me.lucko.luckperms.common.command.CommandManager;
 import me.lucko.luckperms.common.command.utils.ArgumentTokenizer;
 import me.lucko.luckperms.common.sender.Sender;
 
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.minecraft.server.command.ServerCommandSource;
+import net.fabricmc.fabric.api.command.v1.DispatcherRegistrationCallback;
+import net.fabricmc.fabric.api.command.v1.ServerCommandSource;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.greedyString;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.fabricmc.fabric.api.command.v1.CommandManager.argument;
+import static net.fabricmc.fabric.api.command.v1.CommandManager.literal;
 
 public class FabricCommandExecutor extends CommandManager implements Command<ServerCommandSource>, SuggestionProvider<ServerCommandSource> {
     private static final String[] COMMAND_ALIASES = new String[] {"luckperms", "lp", "perm", "perms", "permission", "permissions"};
@@ -58,7 +58,7 @@ public class FabricCommandExecutor extends CommandManager implements Command<Ser
     }
 
     public void register() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        DispatcherRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             for (String alias : COMMAND_ALIASES) {
                 LiteralCommandNode<ServerCommandSource> cmd = literal(alias)
                         .executes(this)

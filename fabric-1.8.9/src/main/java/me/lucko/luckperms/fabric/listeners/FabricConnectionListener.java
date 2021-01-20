@@ -37,10 +37,6 @@ import me.lucko.luckperms.fabric.LPFabricPlugin;
 import me.lucko.luckperms.fabric.mixin.ServerLoginNetworkHandlerAccessor;
 import me.lucko.luckperms.fabric.model.MixinUser;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking.LoginSynchronizer;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -60,77 +56,77 @@ public class FabricConnectionListener extends AbstractConnectionListener {
     }
 
     public void registerListeners() {
-        ServerLoginConnectionEvents.QUERY_START.register(this::onPreLogin);
-        ServerPlayConnectionEvents.JOIN.register(this::onLogin);
-        ServerPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
+//        ServerLoginConnectionEvents.QUERY_START.register(this::onPreLogin);
+//        ServerPlayConnectionEvents.JOIN.register(this::onLogin);
+//        ServerPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
     }
 
-    private void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, LoginSynchronizer sync) {
-        /* Called when the player first attempts a connection with the server. */
+//    private void onPreLogin(ServerLoginNetworkHandler netHandler, MinecraftServer server, PacketSender packetSender, LoginSynchronizer sync) {
+//        /* Called when the player first attempts a connection with the server. */
+//
+//         Get their profile from the net handler - it should have been initialised by now.
+//        GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
+//        UUID uniqueId = PlayerEntity.getUuidFromProfile(profile);
+//        String username = profile.getName();
+//
+//         Register with the LoginSynchronizer that we want to perform a task before the login proceeds.
+//        sync.waitFor(CompletableFuture.runAsync(() -> onPreLoginAsync(netHandler, uniqueId, username), this.plugin.getBootstrap().getScheduler().async()));
+//    }
 
-        // Get their profile from the net handler - it should have been initialised by now.
-        GameProfile profile = ((ServerLoginNetworkHandlerAccessor) netHandler).getGameProfile();
-        UUID uniqueId = PlayerEntity.getUuidFromProfile(profile);
-        String username = profile.getName();
+//    private void onPreLoginAsync(ServerLoginNetworkHandler netHandler, UUID uniqueId, String username) {
+//        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+//            this.plugin.getLogger().info("Processing pre-login for " + uniqueId + " - " + username);
+//        }
+//
+//        /* Actually process the login for the connection.
+//           We do this here to delay the login until the data is ready.
+//           If the login gets cancelled later on, then this will be cleaned up.
+//
+//           This includes:
+//           - loading uuid data
+//           - loading permissions
+//           - creating a user instance in the UserManager for this connection.
+//           - setting up cached data. */
+//        try {
+//            User user = loadUser(uniqueId, username);
+//            recordConnection(uniqueId);
+//            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, user);
+//        } catch (Exception ex) {
+//            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + uniqueId + " - " + username, ex);
+//
+//            // deny the connection
+//            Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
+//            netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
+//            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
+//        }
+//    }
 
-        // Register with the LoginSynchronizer that we want to perform a task before the login proceeds.
-        sync.waitFor(CompletableFuture.runAsync(() -> onPreLoginAsync(netHandler, uniqueId, username), this.plugin.getBootstrap().getScheduler().async()));
-    }
+//    private void onLogin(ServerPlayNetworkHandler netHandler, PacketSender packetSender, MinecraftServer server) {
+//        final ServerPlayerEntity player = netHandler.player;
+//
+//        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
+//            this.plugin.getLogger().info("Processing login for " + player.getUuid() + " - " + player.getName());
+//        }
+//
+//        final User user = this.plugin.getUserManager().getIfLoaded(player.getUuid());
+//
+//        /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
+//        if (user == null) {
+//            this.plugin.getLogger().warn("User " + player.getUuid() + " - " + player.getName() +
+//                    " doesn't currently have data pre-loaded - denying login.");
+//            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
+//            netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
+//            return;
+//        }
+//
+//        // init permissions handler
+//        ((MixinUser) player).initializePermissions(user);
+//
+//        this.plugin.getContextManager().signalContextUpdate(player);
+//    }
 
-    private void onPreLoginAsync(ServerLoginNetworkHandler netHandler, UUID uniqueId, String username) {
-        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing pre-login for " + uniqueId + " - " + username);
-        }
-
-        /* Actually process the login for the connection.
-           We do this here to delay the login until the data is ready.
-           If the login gets cancelled later on, then this will be cleaned up.
-
-           This includes:
-           - loading uuid data
-           - loading permissions
-           - creating a user instance in the UserManager for this connection.
-           - setting up cached data. */
-        try {
-            User user = loadUser(uniqueId, username);
-            recordConnection(uniqueId);
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, user);
-        } catch (Exception ex) {
-            this.plugin.getLogger().severe("Exception occurred whilst loading data for " + uniqueId + " - " + username, ex);
-
-            // deny the connection
-            Component reason = TranslationManager.render(Message.LOADING_DATABASE_ERROR.build());
-            netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
-            this.plugin.getEventDispatcher().dispatchPlayerLoginProcess(uniqueId, username, null);
-        }
-    }
-
-    private void onLogin(ServerPlayNetworkHandler netHandler, PacketSender packetSender, MinecraftServer server) {
-        final ServerPlayerEntity player = netHandler.player;
-
-        if (this.plugin.getConfiguration().get(ConfigKeys.DEBUG_LOGINS)) {
-            this.plugin.getLogger().info("Processing login for " + player.getUuid() + " - " + player.getName());
-        }
-
-        final User user = this.plugin.getUserManager().getIfLoaded(player.getUuid());
-
-        /* User instance is null for whatever reason. Could be that it was unloaded between asyncpre and now. */
-        if (user == null) {
-            this.plugin.getLogger().warn("User " + player.getUuid() + " - " + player.getName() +
-                    " doesn't currently have data pre-loaded - denying login.");
-            Component reason = TranslationManager.render(Message.LOADING_STATE_ERROR.build());
-            netHandler.disconnect(FabricSenderFactory.toNativeText(reason));
-            return;
-        }
-
-        // init permissions handler
-        ((MixinUser) player).initializePermissions(user);
-
-        this.plugin.getContextManager().signalContextUpdate(player);
-    }
-
-    private void onDisconnect(ServerPlayNetworkHandler netHandler, MinecraftServer server) {
-        handleDisconnect(netHandler.player.getUuid());
-    }
+//    private void onDisconnect(ServerPlayNetworkHandler netHandler, MinecraftServer server) {
+//        handleDisconnect(netHandler.player.getUuid());
+//    }
 
 }
