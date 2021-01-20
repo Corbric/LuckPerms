@@ -90,7 +90,7 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
         if (server.isPresent()) {
             Iterable<ServerWorld> worlds = Arrays.asList(server.get().worlds);
             for (ServerWorld world : worlds) {
-                String worldName = getContextKey(new Identifier(world.getLevelProperties().getLevelName()));
+                String worldName = world.getLevelProperties().getLevelName();
                 if (Context.isValidValue(worldName)) {
                     builder.add(DefaultContextKeys.WORLD_KEY, worldName);
                 }
@@ -98,13 +98,6 @@ public class FabricPlayerCalculator implements ContextCalculator<ServerPlayerEnt
         }
 
         return builder.build();
-    }
-
-    private static String getContextKey(Identifier key) {
-        if (key.getNamespace().equals("minecraft")) {
-            return key.getPath();
-        }
-        return key.toString();
     }
 
     private void onWorldChange(ServerWorld origin, ServerWorld destination, ServerPlayerEntity player) {

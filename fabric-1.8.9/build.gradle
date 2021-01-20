@@ -15,7 +15,7 @@ repositories {
 def minecraftVersion = '1.8.9'
 def yarnBuild = "1.8.9+build.202011050955"
 def loaderVersion = '0.9.3+build.202009100647'
-def fabricApiVersion = ' por'
+def fabricApiVersion = '0.10.0'
 
 minecraft {
     intermediaryUrl = {
@@ -34,6 +34,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
 
     modImplementation 'com.github.Corbric:fabric-permissions-api:9ca0cc8c43'
+
+//    runtime('io.netty:netty-all:4.1.58.Final')
 
     compile project(':common')
 }
@@ -92,4 +94,8 @@ tasks.assemble.dependsOn tasks.remappedShadowJar
 artifacts {
     archives remappedShadowJar
     shadow shadowJar
+}
+
+runClient {
+    classpath += sourceSets.main.output
 }
