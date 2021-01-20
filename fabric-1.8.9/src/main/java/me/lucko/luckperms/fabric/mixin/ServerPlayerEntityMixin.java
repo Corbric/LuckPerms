@@ -36,10 +36,13 @@ import me.lucko.luckperms.fabric.model.MixinUser;
 
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -71,6 +74,8 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
 
     // Used by PlayerChangeWorldCallback hook below.
     @Shadow public abstract ServerWorld getServerWorld();
+
+    @Shadow @Final public MinecraftServer server;
 
     @Override
     public User getLuckPermsUser() {
@@ -133,22 +138,22 @@ public abstract class ServerPlayerEntityMixin implements MixinUser {
 
 
     @Inject(at = @At("TAIL"), method = "copyFrom")
-    private void luckperms_copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
-        MixinUser oldMixin = (MixinUser) oldPlayer;
+    private void luckperms_copyFrom(PlayerEntity player, boolean bl, CallbackInfo ci) {
+        MixinUser oldMixin = (MixinUser) player;
         this.luckperms$user = oldMixin.getLuckPermsUser();
         this.luckperms$queryOptions = oldMixin.getQueryOptionsCache();
         this.luckperms$queryOptions.invalidate();
         this.luckperms$locale = oldMixin.getCachedLocale();
     }
 
-    @Inject(at = @At("HEAD"), method = "setClientSettings")
-    private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
-        String language = ((ClientSettingsC2SPacketAccessor) information).getLanguage();
-        this.luckperms$locale = TranslationManager.parseLocale(language);
-    }
+//    @Inject(at = @At("HEAD"), method = "setClientSettings")
+//    private void luckperms_setClientSettings(ClientSettingsC2SPacket information, CallbackInfo ci) {
+//        String language = ((ClientSettingsC2SPacketAccessor) information).getLanguage();
+//        this.luckperms$locale = TranslationManager.parseLocale(language);
+//    }
 
-    @Inject(at = @At("TAIL"), method = "worldChanged")
-    private void luckperms_onChangeDimension(ServerWorld targetWorld, CallbackInfo ci) {
-        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), targetWorld, (ServerPlayerEntity) (Object) this);
+    @Inject(at = @At("TAIL"), method = "teleportToDimension")
+    private void luckperms_onChangeDimension(int dimensionId, CallbackInfo ci) {
+        PlayerChangeWorldCallback.EVENT.invoker().onChangeWorld(this.getServerWorld(), getServerWorld(), (ServerPlayerEntity) (Object) this);
     }
 }

@@ -26,14 +26,31 @@
 package me.lucko.luckperms.fabric;
 
 import me.lucko.luckperms.common.plugin.scheduler.AbstractJavaScheduler;
+import net.minecraft.util.ThreadExecutor;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class FabricSchedulerAdapter extends AbstractJavaScheduler {
     private final Executor sync;
 
     public FabricSchedulerAdapter(LPFabricBootstrap bootstrap) {
-        this.sync = r -> bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready"));
+        this.sync = r -> submitAndJoin(r, bootstrap.getServer().orElseThrow(() -> new IllegalStateException("Server not ready")));
+    }
+
+    private void submitAndJoin(Runnable runnable, ThreadExecutor executor) {
+        if (!executor.isOnThread()) {
+            submitAsync(runnable, executor).join();
+        } else {
+            runnable.run();
+        }
+    }
+
+    private CompletableFuture<Void> submitAsync(Runnable runnable, ThreadExecutor executor) {
+        return CompletableFuture.supplyAsync(() -> {
+            runnable.run();
+            return null;
+        }, (Executor) executor);
     }
 
     @Override

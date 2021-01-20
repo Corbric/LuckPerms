@@ -107,7 +107,8 @@ public class FabricSenderFactory extends SenderFactory<LPFabricPlugin, ServerCom
 
     public static Text toNativeText(Component component) {
         //TODO:
-        return new LiteralText("You need to fix FabricSenderFactory#toNativeText");
+        System.exit(-69);
+        return null;
 //        return Text.Serializer.fromJson(GsonComponentSerializer.gson().serialize(component));
     }
 }
